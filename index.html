@@ -28,7 +28,44 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Fungsi gambar & particle loop...
+function init() {
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.7;
+        for (let i = 0; i < 50; i++) {
+          createParticle(true);
+        }
+      }
+
+      function createParticle(isInit) {
+        let p = {
+          x: Math.random() * canvas.width,
+          y: isInit ? Math.random() * canvas.height : -20,
+          v: Math.random() * 2 + 1,
+          size: Math.random() * 2,
+        };
+        particles.push(p);
+      }
+
+      const particles = [];
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+          let p = particles[i];
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.random() * 2 * Math.PI);
+          ctx.stroke();
+          p.y += p.v;
+          if (p.y > canvas.height) {
+            particles.splice(i, 1);
+            createParticle(false);
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      
+      init();
+      draw();
     </script>
 </body>
 </html>
