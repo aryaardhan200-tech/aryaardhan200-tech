@@ -1,4 +1,4 @@
-<img width="1197" height="553" alt="Screenshot 2026-08-10 134246" src="https://github.com/user-attachments/assets/9995d7a1-c7c7-40ba-a78f-c65a1c432509" />
+<img width="665" height="202" alt="Screenshot 2026-08-10 151817" src="https://github.com/user-attachments/assets/5bdda409-f1a4-4dc5-af46-ef968fb82e26" />
 
 ### 🎮 Play Games With Me
 
