@@ -1,5 +1,6 @@
-## Hi there 👋
+Hi there 👋
 
+<img width="1197" height="553" alt="Screenshot 2026-08-10 134246" src="https://github.com/user-attachments/assets/9995d7a1-c7c7-40ba-a78f-c65a1c432509" />
 <!--
 **aryaardhan200-tech/aryaardhan200-tech** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
