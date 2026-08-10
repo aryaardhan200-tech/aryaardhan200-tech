@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Star and Meteor Animation</title>
+    <title>Animasi Bintang & Mawar</title>
     <style>
         body {
             margin: 0;
@@ -17,40 +17,40 @@
             z-index: 1;
         }
         
-        /* Gambar di tengah */
+        /* Gambar Bunga Mawar di Tengah */
         .center-image {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 2;
-            width: 350px; /* Atur ukuran gambar di sini */
+            z-index: 10; /* Angka tinggi agar berada DI ATAS canvas bintang */
+            width: 280px; 
+            max-width: 80vw;
             pointer-events: none;
-            /* Efek cahaya glow (merah muda) */
-            filter: drop-shadow(0 0 20px rgba(255, 182, 193, 0.9));
-            /* Tambahan animasi mengambang agar lebih estetik */
+            /* Efek Kilau/Glow Pink-Emas seperti di video */
+            filter: drop-shadow(0 0 25px rgba(255, 192, 203, 0.9)) drop-shadow(0 0 45px rgba(255, 215, 0, 0.4));
             animation: float 4s ease-in-out infinite;
         }
 
         @keyframes float {
-            0% { top: 50%; }
-            50% { top: 48%; }
-            100% { top: 50%; }
+            0% { transform: translate(-50%, -50%) translateY(0px); }
+            50% { transform: translate(-50%, -50%) translateY(-12px); }
+            100% { transform: translate(-50%, -50%) translateY(0px); }
         }
     </style>
 </head>
 <body>
     <canvas id="stars"></canvas>
     
-    <!-- Gambar bunga mawar online, akan langsung muncul tanpa perlu download file lokal -->
-    <img src="https://png.pngtree.com/png-clipart/20230102/ourmid/pngtree-pink-crystal-rose-png-image_6549216.png" class="center-image" alt="center image">
+    <!-- Link gambar bunga mawar kristal transparan yang dijamin aman dan pasti muncul -->
+    <img id="rose" src="https://images.rawpixel.com/image_png_800/png/cGZzLTEwL2ltYWdlcy9yYXdwaXhlbF9yZWxlYXNlZC9zdGF0aWMvaW1hZ2Uva2lkODJna3FfcmF3cGl4ZWxfOTgwMjgucG5n.png" class="center-image" alt="Rose">
 
     <script>
         var context;
         var arr = new Array();
-        var starCount = 800; // Jumlah bintang
+        var starCount = 800;
         var rains = new Array();
-        var rainCount = 40; // Jumlah meteor diperbanyak agar lebih sering terlihat
+        var rainCount = 30;
 
         function init() {
             var stars = document.getElementById("stars");
@@ -59,7 +59,6 @@
             context = stars.getContext("2d");
         }
 
-        // --- Bintang ---
         var Star = function() {
             this.x = window.innerWidth * Math.random();
             this.y = window.innerHeight * Math.random();
@@ -67,12 +66,7 @@
             this.color = "white";
             
             this.getColor = function() {
-                var _r = Math.random();
-                if (_r < 0.5) {
-                    this.color = "#333";
-                } else {
-                    this.color = "white";
-                }
+                this.color = Math.random() < 0.5 ? "#333" : "white";
             };
             
             this.init = function() {
@@ -86,7 +80,6 @@
             };
         };
 
-        // --- Hujan Meteor ---
         var MeteorRain = function() {
             this.x = -1;
             this.y = -1;
@@ -98,18 +91,13 @@
             this.offset_x = -1;
             this.offset_y = -1;
             this.alpha = 1;
-            this.color1 = "";
-            this.color2 = "";
             
             this.init = function() {
                 this.getPos();
                 this.alpha = 1;
-                this.getRandomColor();
-                var x = Math.random() * 80 + 150;
-                this.length = Math.ceil(x);
+                this.length = Math.ceil(Math.random() * 80 + 150);
                 this.angle = 30; 
-                x = Math.random() * 5 + 5; // Kecepatan meteor sedikit dipercepat
-                this.speed = Math.ceil(x);
+                this.speed = Math.ceil(Math.random() * 5 + 5);
                 
                 var cos = Math.cos(this.angle * 3.14 / 180);
                 var sin = Math.sin(this.angle * 3.14 / 180);
@@ -119,28 +107,21 @@
                 this.offset_y = this.speed * sin;
             };
             
-            this.getRandomColor = function() {
-                var a = Math.ceil(255 - 240 * Math.random());
-                this.color1 = "rgba(" + a + "," + a + "," + a + ",1)";
-                this.color2 = "black";
-            };
-            
             this.getPos = function() {
-                // Agar meteor muncul dari sisi kanan atas
-                this.x = Math.random() * window.innerWidth + 200; 
-                this.y = Math.random() * window.innerHeight * -1; // Muncul perlahan dari luar layar atas
+                this.x = Math.random() * window.innerWidth + 300; 
+                this.y = Math.random() * window.innerHeight * -1;
             };
             
             this.draw = function() {
                 context.save();
                 context.beginPath();
-                context.lineWidth = 2; // Garis meteor sedikit dipertebal
+                context.lineWidth = 2;
                 context.globalAlpha = this.alpha;
                 
                 var line = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y - this.height);
                 line.addColorStop(0, "white");
-                line.addColorStop(0.3, this.color1);
-                line.addColorStop(0.6, this.color2);
+                line.addColorStop(0.4, "rgba(255,255,255,0.5)");
+                line.addColorStop(1, "transparent");
                 
                 context.strokeStyle = line;
                 context.moveTo(this.x, this.y);
@@ -151,9 +132,9 @@
             };
             
             this.move = function() {
-                this.x = this.x - this.offset_x;
-                this.y = this.y + this.offset_y;
-                this.alpha -= 0.002;
+                this.x -= this.offset_x;
+                this.y += this.offset_y;
+                this.alpha -= 0.003;
                 this.draw();
             };
         };
@@ -198,9 +179,7 @@
         };
         
         window.onresize = function() {
-            var stars = document.getElementById("stars");
-            stars.width = window.innerWidth;
-            stars.height = window.innerHeight;
+            init();
         };
     </script>
 </body>
