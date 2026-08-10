@@ -16,34 +16,42 @@
             left: 0;
             z-index: 1;
         }
-        /* Kelas ini digunakan jika Anda ingin menambahkan gambar (seperti mawar) di tengah layar */
+        
+        /* Gambar di tengah */
         .center-image {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 2;
-            width: 350px; 
+            width: 350px; /* Atur ukuran gambar di sini */
             pointer-events: none;
-            /* Tambahkan efek cahaya seperti di video */
-            filter: drop-shadow(0 0 15px rgba(255, 182, 193, 0.8));
+            /* Efek cahaya glow (merah muda) */
+            filter: drop-shadow(0 0 20px rgba(255, 182, 193, 0.9));
+            /* Tambahan animasi mengambang agar lebih estetik */
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { top: 50%; }
+            50% { top: 48%; }
+            100% { top: 50%; }
         }
     </style>
 </head>
 <body>
     <canvas id="stars"></canvas>
     
-    <!-- Hapus tanda komentar pada baris di bawah ini dan ubah src dengan gambar Anda (misal bunga mawar berformat PNG) -->
-    <!-- <img src="mawar.png" class="center-image" alt="center image"> -->
+    <!-- Gambar bunga mawar online, akan langsung muncul tanpa perlu download file lokal -->
+    <img src="https://png.pngtree.com/png-clipart/20230102/ourmid/pngtree-pink-crystal-rose-png-image_6549216.png" class="center-image" alt="center image">
 
     <script>
         var context;
         var arr = new Array();
-        var starCount = 800;
+        var starCount = 800; // Jumlah bintang
         var rains = new Array();
-        var rainCount = 20;
+        var rainCount = 40; // Jumlah meteor diperbanyak agar lebih sering terlihat
 
-        // Inisialisasi Canvas
         function init() {
             var stars = document.getElementById("stars");
             stars.width = window.innerWidth;
@@ -51,14 +59,13 @@
             context = stars.getContext("2d");
         }
 
-        // --- Objek Bintang ---
+        // --- Bintang ---
         var Star = function() {
             this.x = window.innerWidth * Math.random();
             this.y = window.innerHeight * Math.random();
             this.text = ".";
             this.color = "white";
             
-            // Logika warna bintang (berkedip)
             this.getColor = function() {
                 var _r = Math.random();
                 if (_r < 0.5) {
@@ -79,12 +86,12 @@
             };
         };
 
-        // --- Objek Hujan Meteor ---
+        // --- Hujan Meteor ---
         var MeteorRain = function() {
             this.x = -1;
             this.y = -1;
             this.length = -1;
-            this.angle = 30; // Kemiringan meteor seperti di video
+            this.angle = 30; 
             this.width = -1;
             this.height = -1;
             this.speed = 1;
@@ -101,7 +108,7 @@
                 var x = Math.random() * 80 + 150;
                 this.length = Math.ceil(x);
                 this.angle = 30; 
-                x = Math.random() * 5 + 2; 
+                x = Math.random() * 5 + 5; // Kecepatan meteor sedikit dipercepat
                 this.speed = Math.ceil(x);
                 
                 var cos = Math.cos(this.angle * 3.14 / 180);
@@ -119,17 +126,17 @@
             };
             
             this.getPos = function() {
-                this.x = Math.random() * window.innerWidth;
-                this.y = Math.random() * window.innerHeight * -0.5; // Mulai dari atas layar
+                // Agar meteor muncul dari sisi kanan atas
+                this.x = Math.random() * window.innerWidth + 200; 
+                this.y = Math.random() * window.innerHeight * -1; // Muncul perlahan dari luar layar atas
             };
             
             this.draw = function() {
                 context.save();
                 context.beginPath();
-                context.lineWidth = 1.5;
+                context.lineWidth = 2; // Garis meteor sedikit dipertebal
                 context.globalAlpha = this.alpha;
                 
-                // Gradient ekor meteor
                 var line = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y - this.height);
                 line.addColorStop(0, "white");
                 line.addColorStop(0.3, this.color1);
@@ -151,7 +158,6 @@
             };
         };
 
-        // Memutar Animasi Bintang
         function playStars() {
             for (var n = 0; n < starCount; n++) {
                 arr[n].getColor();
@@ -159,40 +165,31 @@
             }
         }
 
-        // Memutar Animasi Meteor
         function playRains() {
             for (var n = 0; n < rainCount; n++) {
                 var rain = rains[n];
                 rain.move();
-                // Jika meteor keluar layar bawah atau pudar, reset
-                if (rain.y > window.innerHeight + 100 || rain.alpha <= 0) {
+                if (rain.y > window.innerHeight + 100 || rain.alpha <= 0 || rain.x < -100) {
                     rains[n] = new MeteorRain();
                     rains[n].init();
                 }
             }
         }
 
-        // --- Mulai Animasi ---
         window.onload = function() {
             init();
-            
-            // Buat bintang
             for (var i = 0; i < starCount; i++) {
                 var star = new Star();
                 star.init();
                 star.draw();
                 arr.push(star);
             }
-            
-            // Buat meteor
             for (var i = 0; i < rainCount; i++) {
                 var rain = new MeteorRain();
                 rain.init();
                 rain.draw();
                 rains.push(rain);
             }
-            
-            // Frame rate animasi
             setInterval(function() {
                 context.clearRect(0, 0, window.innerWidth, window.innerHeight);
                 playStars();
@@ -200,7 +197,6 @@
             }, 1000 / 60); 
         };
         
-        // Sesuaikan canvas saat jendela browser diubah ukurannya
         window.onresize = function() {
             var stars = document.getElementById("stars");
             stars.width = window.innerWidth;
