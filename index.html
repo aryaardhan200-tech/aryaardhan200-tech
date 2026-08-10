@@ -1,71 +1,105 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Animasi Canvas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rose & Stars Animation</title>
     <style>
-        body {
+        body, html {
             margin: 0;
             padding: 0;
-            background-color: black;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         canvas {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+        }
+        /* Styling untuk teks/gambar mawar di tengah */
+        .rose-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+        .rose-text {
+            color: #ffb6c1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 22px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { opacity: 0.6; text-shadow: 0 0 5px #ff69b4; }
+            to { opacity: 1; text-shadow: 0 0 20px #ff1493, 0 0 30px #ff69b4; }
         }
     </style>
 </head>
 <body>
-    <canvas id="stars"></canvas>
+
+    <!-- Kanvas untuk efek bintang/hujan -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Elemen visual mawar di tengah -->
+    <div class="rose-container">
+        <div class="rose-text">🌹 For You 🌹</div>
+    </div>
 
     <script>
-        // Kode JavaScript animasi dimasukkan di sini
-        const canvas = document.getElementById('stars');
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
 
-function init() {
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.7;
-        for (let i = 0; i < 50; i++) {
-          createParticle(true);
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Membuat partikel bintang / hujan
+        const particles = [];
+        const maxParticles = 100;
+
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 2,
+                speedY: Math.random() * 1 + 0.5,
+                alpha: Math.random()
+            });
         }
-      }
 
-      function createParticle(isInit) {
-        let p = {
-          x: Math.random() * canvas.width,
-          y: isInit ? Math.random() * canvas.height : -20,
-          v: Math.random() * 2 + 1,
-          size: Math.random() * 2,
-        };
-        particles.push(p);
-      }
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            ctx.fillStyle = 'white';
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
 
-      const particles = [];
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < particles.length; i++) {
-          let p = particles[i];
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.random() * 2 * Math.PI);
-          ctx.stroke();
-          p.y += p.v;
-          if (p.y > canvas.height) {
-            particles.splice(i, 1);
-            createParticle(false);
-          }
+                p.y += p.speedY;
+                if (p.y > height) {
+                    p.y = 0;
+                    p.x = Math.random() * width;
+                }
+            });
+
+            requestAnimationFrame(animate);
         }
-        requestAnimationFrame(draw);
-      }
-      
-      init();
-      draw();
+
+        animate();
     </script>
 </body>
 </html>
