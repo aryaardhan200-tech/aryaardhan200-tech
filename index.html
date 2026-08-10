@@ -1,105 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rose & Stars Animation</title>
+    <meta charset="utf-8">
+    <title>Star and Meteor Animation</title>
     <style>
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
+            background-color: black;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        canvas {
+        #stars {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            z-index: 1;
         }
-        /* Styling untuk teks/gambar mawar di tengah */
-        .rose-container {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-        }
-        .rose-text {
-            color: #ffb6c1;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 22px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes glow {
-            from { opacity: 0.6; text-shadow: 0 0 5px #ff69b4; }
-            to { opacity: 1; text-shadow: 0 0 20px #ff1493, 0 0 30px #ff69b4; }
+        /* Kelas ini digunakan jika Anda ingin menambahkan gambar (seperti mawar) di tengah layar */
+        .center-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            width: 350px; 
+            pointer-events: none;
+            /* Tambahkan efek cahaya seperti di video */
+            filter: drop-shadow(0 0 15px rgba(255, 182, 193, 0.8));
         }
     </style>
 </head>
 <body>
-
-    <!-- Kanvas untuk efek bintang/hujan -->
-    <canvas id="canvas"></canvas>
-
-    <!-- Elemen visual mawar di tengah -->
-    <div class="rose-container">
-        <div class="rose-text">🌹 For You 🌹</div>
-    </div>
+    <canvas id="stars"></canvas>
+    
+    <!-- Hapus tanda komentar pada baris di bawah ini dan ubah src dengan gambar Anda (misal bunga mawar berformat PNG) -->
+    <!-- <img src="mawar.png" class="center-image" alt="center image"> -->
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        var context;
+        var arr = new Array();
+        var starCount = 800;
+        var rains = new Array();
+        var rainCount = 20;
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        // Membuat partikel bintang / hujan
-        const particles = [];
-        const maxParticles = 100;
-
-        for (let i = 0; i < maxParticles; i++) {
-            particles.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                size: Math.random() * 2,
-                speedY: Math.random() * 1 + 0.5,
-                alpha: Math.random()
-            });
+        // Inisialisasi Canvas
+        function init() {
+            var stars = document.getElementById("stars");
+            stars.width = window.innerWidth;
+            stars.height = window.innerHeight;
+            context = stars.getContext("2d");
         }
 
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
+        // --- Objek Bintang ---
+        var Star = function() {
+            this.x = window.innerWidth * Math.random();
+            this.y = window.innerHeight * Math.random();
+            this.text = ".";
+            this.color = "white";
             
-            ctx.fillStyle = 'white';
-            particles.forEach(p => {
-                ctx.globalAlpha = p.alpha;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-
-                p.y += p.speedY;
-                if (p.y > height) {
-                    p.y = 0;
-                    p.x = Math.random() * width;
+            // Logika warna bintang (berkedip)
+            this.getColor = function() {
+                var _r = Math.random();
+                if (_r < 0.5) {
+                    this.color = "#333";
+                } else {
+                    this.color = "white";
                 }
-            });
+            };
+            
+            this.init = function() {
+                this.getColor();
+            };
+            
+            this.draw = function() {
+                context.fillStyle = this.color;
+                context.font = "15px Arial";
+                context.fillText(this.text, this.x, this.y);
+            };
+        };
 
-            requestAnimationFrame(animate);
+        // --- Objek Hujan Meteor ---
+        var MeteorRain = function() {
+            this.x = -1;
+            this.y = -1;
+            this.length = -1;
+            this.angle = 30; // Kemiringan meteor seperti di video
+            this.width = -1;
+            this.height = -1;
+            this.speed = 1;
+            this.offset_x = -1;
+            this.offset_y = -1;
+            this.alpha = 1;
+            this.color1 = "";
+            this.color2 = "";
+            
+            this.init = function() {
+                this.getPos();
+                this.alpha = 1;
+                this.getRandomColor();
+                var x = Math.random() * 80 + 150;
+                this.length = Math.ceil(x);
+                this.angle = 30; 
+                x = Math.random() * 5 + 2; 
+                this.speed = Math.ceil(x);
+                
+                var cos = Math.cos(this.angle * 3.14 / 180);
+                var sin = Math.sin(this.angle * 3.14 / 180);
+                this.width = this.length * cos;
+                this.height = this.length * sin;
+                this.offset_x = this.speed * cos;
+                this.offset_y = this.speed * sin;
+            };
+            
+            this.getRandomColor = function() {
+                var a = Math.ceil(255 - 240 * Math.random());
+                this.color1 = "rgba(" + a + "," + a + "," + a + ",1)";
+                this.color2 = "black";
+            };
+            
+            this.getPos = function() {
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight * -0.5; // Mulai dari atas layar
+            };
+            
+            this.draw = function() {
+                context.save();
+                context.beginPath();
+                context.lineWidth = 1.5;
+                context.globalAlpha = this.alpha;
+                
+                // Gradient ekor meteor
+                var line = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y - this.height);
+                line.addColorStop(0, "white");
+                line.addColorStop(0.3, this.color1);
+                line.addColorStop(0.6, this.color2);
+                
+                context.strokeStyle = line;
+                context.moveTo(this.x, this.y);
+                context.lineTo(this.x + this.width, this.y - this.height);
+                context.closePath();
+                context.stroke();
+                context.restore();
+            };
+            
+            this.move = function() {
+                this.x = this.x - this.offset_x;
+                this.y = this.y + this.offset_y;
+                this.alpha -= 0.002;
+                this.draw();
+            };
+        };
+
+        // Memutar Animasi Bintang
+        function playStars() {
+            for (var n = 0; n < starCount; n++) {
+                arr[n].getColor();
+                arr[n].draw();
+            }
         }
 
-        animate();
+        // Memutar Animasi Meteor
+        function playRains() {
+            for (var n = 0; n < rainCount; n++) {
+                var rain = rains[n];
+                rain.move();
+                // Jika meteor keluar layar bawah atau pudar, reset
+                if (rain.y > window.innerHeight + 100 || rain.alpha <= 0) {
+                    rains[n] = new MeteorRain();
+                    rains[n].init();
+                }
+            }
+        }
+
+        // --- Mulai Animasi ---
+        window.onload = function() {
+            init();
+            
+            // Buat bintang
+            for (var i = 0; i < starCount; i++) {
+                var star = new Star();
+                star.init();
+                star.draw();
+                arr.push(star);
+            }
+            
+            // Buat meteor
+            for (var i = 0; i < rainCount; i++) {
+                var rain = new MeteorRain();
+                rain.init();
+                rain.draw();
+                rains.push(rain);
+            }
+            
+            // Frame rate animasi
+            setInterval(function() {
+                context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                playStars();
+                playRains();
+            }, 1000 / 60); 
+        };
+        
+        // Sesuaikan canvas saat jendela browser diubah ukurannya
+        window.onresize = function() {
+            var stars = document.getElementById("stars");
+            stars.width = window.innerWidth;
+            stars.height = window.innerHeight;
+        };
     </script>
 </body>
 </html>
